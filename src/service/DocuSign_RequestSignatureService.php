@@ -55,14 +55,23 @@ class DocuSign_RequestSignatureResource extends DocuSign_Resource {
 		);
 		if( isset($templateRoles) && sizeof($templateRoles) > 0 ) {
 			$templateRolesList = array();
-			$templateRole = new DocuSign_TemplateRole($templateRole['roleName'],$templateRole['name'],$templateRole['email'],$templateRole['tabs']);
+			// $templateRole = new DocuSign_TemplateRole($templateRole['roleName'],$templateRole['name'],$templateRole['email'],$templateRole['tabs']);
 			foreach( $templateRoles as $templateRole ) {
-				$templateRole = new DocuSign_TemplateRole($templateRole['roleName'],$templateRole['name'],$templateRole['email']);
-				array_push($templateRolesList, array (
+                $tabs = !empty($templateRole['tabs']) ? $templateRole['tabs'] : NULL;
+                $clientUserId = !empty($templateRole['clientUserId']) ? $templateRole['clientUserId'] : NULL;
+				$templateRole = new DocuSign_TemplateRole($templateRole['roleName'],$templateRole['name'],$templateRole['email'],$tabs,$clientUserId);
+                $templateRoleItem = array (
 					"roleName" => $templateRole->getRolename(),
 					"name" => $templateRole->getName(),
-					"email" => $templateRole->getEmail()
-				));
+					"email" => $templateRole->getEmail(),
+				);
+                if ($tabs) {
+                    $templateRoleItem["tabs"] = $tabs;
+                }
+                if ($clientUserId) {
+                    $templateRoleItem["clientUserId"] = $clientUserId;
+                }
+				array_push($templateRolesList, $templateRoleItem);
 			}
 			$data['templateRoles'] = $templateRolesList;
 		}
@@ -272,7 +281,7 @@ class DocuSign_TemplateRole extends DocuSign_Model {
 	private $email;
 	private $tabs;
 
-	public function __construct($roleName, $name, $email, $tabs = NULL) {
+	public function __construct($roleName, $name, $email, $tabs = NULL, $clientUserId = NULL) {
 		if( isset($roleName) ) $this->roleName = $roleName;
 		if( isset($name) ) $this->name = $name;
 		if( isset($email) ) $this->email = $email;
